@@ -1,7 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-}
-
 resource "aws_iam_role" "lambda_exec_role" {
   name = "${var.project_name}-lambda-exec-role"
 
