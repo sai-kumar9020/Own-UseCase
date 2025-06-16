@@ -1,11 +1,7 @@
-# main.tf
-
-# Configure the AWS Provider
 provider "aws" {
   region = var.aws_region
 }
 
-# --- IAM Role for Lambda Function ---
 resource "aws_iam_role" "lambda_exec_role" {
   name = "${var.project_name}-lambda-exec-role"
 
@@ -28,36 +24,6 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# (Optional) Add S3 permissions if your Lambda cleans S3
-# resource "aws_iam_policy" "s3_cleanup_policy" {
-#   count       = var.enable_s3_cleanup ? 1 : 0
-#   name        = "${var.project_name}-s3-cleanup-policy"
-#   description = "IAM policy for Lambda to clean up S3"
-#
-#   policy = jsonencode({
-#     Version = "2012-10-17",
-#     Statement = [
-#       {
-#         Effect   = "Allow",
-#         Action   = [
-#           "s3:ListBucket",
-#           "s3:DeleteObject"
-#         ],
-#         Resource = [
-#           "arn:aws:s3:::${var.s3_bucket_name}",
-#           "arn:aws:s3:::${var.s3_bucket_name}/${var.s3_prefix}*"
-#         ]
-#       }
-#     ]
-#   })
-# }
-#
-# resource "aws_iam_role_policy_attachment" "s3_cleanup_policy_attachment" {
-#   count      = var.enable_s3_cleanup ? 1 : 0
-#   role       = aws_iam_role.lambda_exec_role.name
-#   policy_arn = aws_iam_policy.s3_cleanup_policy[0].arn
-# }
-
 # --- Lambda Function ---
 data "archive_file" "lambda_zip" {
   type        = "zip"
@@ -74,13 +40,6 @@ resource "aws_lambda_function" "scheduled_lambda" {
   runtime          = "python3.9" # Or your preferred Python version
   timeout          = 30          # seconds
   memory_size      = 128         # MB
-
-  environment {
-    variables = {
-      # S3_BUCKET_NAME = var.enable_s3_cleanup ? var.s3_bucket_name : ""
-      # S3_PREFIX      = var.enable_s3_cleanup ? var.s3_prefix : ""
-    }
-  }
 
   tags = {
     Project = var.project_name
@@ -118,7 +77,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_lambda" {
 # (Optional) CloudWatch Log Group for the Lambda function
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name              = "/aws/lambda/${aws_lambda_function.scheduled_lambda.function_name}"
-  retention_in_days = 7 # Retain logs for 7 days
+  retention_in_days = 7 
 
   tags = {
     Project = var.project_name
