@@ -24,6 +24,37 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+# Add S3 permissions if your Lambda cleans S3
+resource "aws_iam_policy" "s3_cleanup_policy" {
+   count       = var.enable_s3_cleanup ? 1 : 0
+   name        = "${var.project_name}-s3-cleanup-policy"
+   description = "IAM policy for Lambda to clean up S3"
+
+   policy = jsonencode({
+     Version = "2012-10-17",
+     Statement = [
+       {
+         Effect   = "Allow",
+         Action   = [
+           "s3:ListBucket",
+           "s3:DeleteObject"
+         ],
+         Resource = [
+           "arn:aws:s3:::${var.s3_bucket_name}",
+           "arn:aws:s3:::${var.s3_bucket_name}/${var.s3_prefix}*"
+         ]
+       }
+     ]
+   })
+}
+
+resource "aws_iam_role_policy_attachment" "s3_cleanup_policy_attachment" {
+   count      = var.enable_s3_cleanup ? 1 : 0
+   role       = aws_iam_role.lambda_exec_role.name
+   policy_arn = aws_iam_policy.s3_cleanup_policy[0].arn
+}
+
+
 # --- Lambda Function ---
 data "archive_file" "lambda_zip" {
   type        = "zip"
@@ -74,7 +105,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_invoke_lambda" {
   source_arn    = aws_cloudwatch_event_rule.every_6_hours.arn
 }
 
-# (Optional) CloudWatch Log Group for the Lambda function
+# CloudWatch Log Group for the Lambda function
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name              = "/aws/lambda/${aws_lambda_function.scheduled_lambda.function_name}"
   retention_in_days = 7 
