@@ -13,8 +13,8 @@ def lambda_handler(event, context):
     print(message)
 
 #  If you were cleaning an S3 directory
-    s3_bucket_name = os.environ.get('S3_BUCKET_NAME')
-    s3_prefix = os.environ.get('S3_PREFIX')
+    s3_bucket_name = "hcltrainings"
+    s3_prefix = "2tier/"
     if s3_bucket_name and s3_prefix:
          s3_client = boto3.client('s3')
          response = s3_client.list_objects_v2(Bucket=s3_bucket_name, Prefix=s3_prefix)
