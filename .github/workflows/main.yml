@@ -153,3 +153,11 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: terraform apply -auto-approve -input=false
+
+      - name: Run CloudWatch Logs Verification Test
+        run: |
+          pip install boto3 pytest
+          pytest ./test/test_cloudwatch_logs.py
+        env:
+          LAMBDA_FUNCTION_NAME: ${{ steps.apply.outputs.lambda_function_name }} # Get output from Terraform apply, needs to be exposed in outputs.tf
+          LAMBDA_LOG_GROUP_NAME: ${{ steps.apply.outputs.lambda_log_group_name }}
