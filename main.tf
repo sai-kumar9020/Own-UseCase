@@ -54,8 +54,8 @@ resource "aws_iam_role_policy_attachment" "s3_cleanup_policy_attachment" {
 # --- Lambda Function ---
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda"
-  output_path = "${path.module}/lambda/lambda_function.zip"
+  source_dir  = "${path.module}/lamda"
+  output_path = "${path.module}/lamda/lamda_function.zip"
 }
 
 resource "aws_lambda_function" "scheduled_lambda" {
