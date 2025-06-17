@@ -4,9 +4,8 @@ import boto3
 import pytest
 
 # Environment variables from CI/CD pipeline
-LAMBDA_FUNCTION_NAME = os.environ.get('LAMBDA_FUNCTION_NAME')
-LAMBDA_LOG_GROUP_NAME = os.environ.get('LAMBDA_LOG_GROUP_NAME')
-
+LAMBDA_FUNCTION_NAME = "my-scheduled-app-scheduled-function"
+LAMBDA_LOG_GROUP_NAME = "/aws/lambda/my-scheduled-app-scheduled-function"
 @pytest.fixture(scope="module")
 def lambda_client():
     return boto3.client('lambda', region_name=os.environ.get('AWS_REGION', 'us-east-1'))
