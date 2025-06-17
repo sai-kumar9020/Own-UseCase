@@ -78,7 +78,7 @@ resource "aws_lambda_function" "scheduled_lambda" {
 resource "aws_cloudwatch_event_rule" "every_6_hours" {
   name                = "${var.project_name}-every-6-hours-rule"
   description         = "Triggers the Lambda function every 6 hours"
-  schedule_expression = "rate(6 hours)" # Or "cron(0 */6 * * ? *)" for specific hour (UTC)
+  schedule_expression = "rate(5 minutes)" # Or "cron(0 */6 * * ? *)" for specific hour (UTC)
 
   tags = {
     Project = var.project_name
